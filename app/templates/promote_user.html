@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Promote User{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4 text-center">Promote User to Admin</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="user_index" class="form-label">Select User</label>
+            <select class="form-select" name="user_index" required>
+                {% for user in users %}
+                    <option value="{{ loop.index0 }}">{{ user.username }} ({{ user.role }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Promote</button>
+    </form>
+</div>
+{% endblock %}

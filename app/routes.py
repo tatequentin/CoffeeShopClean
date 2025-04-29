@@ -1,93 +1,117 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+import json
 import os
-import random
-from werkzeug.utils import secure_filename
 
 bp = Blueprint('main', __name__)
+DATA_DIR = os.path.join('app', 'data')
+USERS_FILE = os.path.join(DATA_DIR, 'users.json')
+MENU_FILE = os.path.join(DATA_DIR, 'menu.json')
 
-menu_items = [
-    {'name': 'Honey Lavender Espresso', 'description': 'Doppio espresso, honey, lavender syrup.', 'price': 4.79, 'image': 'Honey-Lavender-Espresso.png'},
-    {'name': 'Bronze Banana Blast', 'description': 'Banana cordial, caramel syrup, doppio espresso shot, milk, blended with ice and topped with whipped cream and caramelized bananas.', 'price': 9.99, 'image': 'Bronze-Banana-Blast.png'},
-    {'name': 'Salted Caramel Mocha', 'description': 'Doppio espresso shot, salted caramel syrup, non-alcoholic chocolate bitters, milk, topped with shaved dark chocolate.', 'price': 7.99, 'image': 'Salted-Caramel-Mocha.png'},
-    {'name': 'Very Berry Hibiscus Cooler', 'description': 'Blackberries, blueberries, mint, and agave muddled in a shaker tin, shaken and strained over ice, topped with sparkling water and mint garnish.', 'price': 8.50, 'image': 'Very-Berry-Hibiscus-Cooler.png'},
-    {'name': 'Pistachio Cardamom Roll', 'description': 'Cardamom and pistachio baked into a house-made brioche roll, topped with shaved pistachios.', 'price': 6.50, 'image': 'Pistachio-Cardamom-Roll.jpg'},
-    {'name': 'Truly Blue Tiramisu', 'description': 'House-made tiramisu base with fresh espresso and blueberry syrup baked in, then topped with blueberry compote and an Oreo crust.', 'price': 12.99, 'image': 'Truly-Blue-Tiramisu.png'}
-]
+def load_users():
+    with open(USERS_FILE, 'r') as f:
+        return json.load(f)
+
+def save_users(users):
+    with open(USERS_FILE, 'w') as f:
+        json.dump(users, f, indent=4)
+
+def load_menu():
+    with open(MENU_FILE, 'r') as f:
+        return json.load(f)
+
+def save_menu(menu):
+    with open(MENU_FILE, 'w') as f:
+        json.dump(menu, f, indent=4)
 
 @bp.route('/')
 def index():
     return render_template('index.html')
 
+@bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        users = load_users()
+        username = request.form['username']
+        password = request.form['password']
+        for user in users:
+            if user['username'] == username and user['password'] == password:
+                session['username'] = username
+                session['is_admin'] = user.get('role') == 'admin'
+                flash('Logged in successfully!')
+                return redirect(url_for('main.index'))
+        flash('Invalid credentials.')
+    return render_template('login.html')
+
+@bp.route('/logout')
+def logout():
+    session.clear()
+    flash('Logged out.')
+    return redirect(url_for('main.index'))
+
+@bp.route('/sales-report')
+def sales_report():
+    if not session.get('is_admin'):
+        flash('Admin access required.')
+        return redirect(url_for('main.index'))
+    return render_template('sales_report.html')
+
+@bp.route('/modify-items', methods=['GET', 'POST'])
+def modify_items():
+    if not session.get('is_admin'):
+        flash('Admin access required.')
+        return redirect(url_for('main.index'))
+    menu = load_menu()
+    if request.method == 'POST':
+        menu[int(request.form['item_index'])]['name'] = request.form['new_name']
+        save_menu(menu)
+        flash('Item updated!')
+        return redirect(url_for('main.modify_items'))
+    return render_template('modify_items.html', menu=menu)
+
+@bp.route('/promote-user', methods=['GET', 'POST'])
+def promote_user():
+    if not session.get('is_admin'):
+        flash('Admin access required.')
+        return redirect(url_for('main.index'))
+    users = load_users()
+    if request.method == 'POST':
+        index = int(request.form['user_index'])
+        users[index]['role'] = 'admin'
+        save_users(users)
+        flash('User promoted!')
+        return redirect(url_for('main.promote_user'))
+    return render_template('promote_user.html', users=users)
+
 @bp.route('/menu')
 def menu():
+    menu_items = load_menu()
     query = request.args.get('q', '').lower()
     if query:
-        filtered_items = [item for item in menu_items if query in item['name'].lower() or query in item['description'].lower()]
+        filtered = [item for item in menu_items if query in item['name'].lower() or query in item['description'].lower()]
     else:
-        filtered_items = menu_items
-    return render_template('menu.html', items=filtered_items, query=query)
+        filtered = menu_items
+    return render_template('menu.html', items=filtered, query=query)
 
 @bp.route('/add-to-cart/<int:item_id>')
 def add_to_cart(item_id):
-    item = menu_items[item_id]
-    cart = session.get('cart', [])
-
-    cart.append({
-        'name': item['name'],
-        'description': item['description'],
-        'price': item['price'],
-        'image': item['image']
-    })
-
-    session['cart'] = cart
-    flash(f"{item['name']} added to cart!")
+    menu_items = load_menu()
+    if 0 <= item_id < len(menu_items):
+        item = menu_items[item_id]
+        cart = session.get('cart', [])
+        cart.append(item)
+        session['cart'] = cart
+        flash(f"{item['name']} added to cart!")
+    else:
+        flash("Item not found.")
     return redirect(url_for('main.menu'))
 
 @bp.route('/cart')
 def cart():
     cart_items = session.get('cart', [])
-
     subtotal = sum(item['price'] for item in cart_items)
-    tax = subtotal * 0.07
-    grand_total = subtotal + tax
-
-    suggestions = []
-    if menu_items:
-        sampled_items = random.sample(menu_items, k=min(2, len(menu_items)))
-        for idx, item in enumerate(sampled_items):
-            suggestions.append({
-                'index': menu_items.index(item),
-                'name': item['name'],
-                'price': item['price'],
-                'description': item['description'],
-                'image': item['image']
-            })
-
-    return render_template('cart.html', cart_items=cart_items, subtotal=subtotal, tax=tax, grand_total=grand_total, suggestions=suggestions)
-
-@bp.route('/add-item', methods=['GET', 'POST'])
-def add_item():
-    if request.method == 'POST':
-        name = request.form['name']
-        description = request.form['description']
-        price = float(request.form['price'])
-        image_file = request.files['image']
-
-        filename = secure_filename(image_file.filename)
-        image_path = os.path.join('app/static/img', filename)
-        image_file.save(image_path)
-
-        menu_items.append({
-            'name': name,
-            'description': description,
-            'price': price,
-            'image': filename
-        })
-
-        flash('Menu item added!')
-        return redirect(url_for('main.menu'))
-
-    return render_template('add_item.html')
+    tax = round(subtotal * 0.07, 2)
+    grand_total = round(subtotal + tax, 2)
+    return render_template('cart.html', cart_items=cart_items, subtotal=subtotal, tax=tax, grand_total=grand_total)
 
 @bp.route('/remove-from-cart/<int:item_index>')
 def remove_from_cart(item_index):
@@ -105,12 +129,4 @@ def confirm_order():
     session['cart'] = []
     return render_template('order_confirmed.html')
 
-@bp.route('/order-confirmed')
-def order_confirmed():
-    return render_template('order_confirmed.html')
 
-@bp.route('/clear-cart')
-def clear_cart():
-    session['cart'] = []
-    flash('Cart cleared.')
-    return redirect(url_for('main.menu'))

@@ -1,0 +1,38 @@
+[
+    {
+        "name": "Honey Lavender Espresso",
+        "description": "Doppio espresso, honey, lavender syrup.",
+        "price": 4.79,
+        "image": "Honey-Lavender-Espresso.png"
+    },
+    {
+        "name": "Bronze Banana Blast",
+        "description": "Banana cordial, caramel syrup, doppio espresso shot, milk, blended with ice and topped with whipped cream and caramelized bananas.",
+        "price": 9.99,
+        "image": "Bronze-Banana-Blast.png"
+    },
+    {
+        "name": "Salted Caramel Mocha",
+        "description": "Doppio espresso shot, salted caramel syrup, non-alcholic chocolate bitters, milk, topped with shaved dark chocolate.",
+        "price": 7.99,
+        "image": "Salted-Caramel-Mocha.png"
+    },
+    {
+        "name": "Very Berry Hibiscus Cooler",
+        "description": "Blackberries, blueberries, mint, and agave muddled in a shaker tin, shaken and strained over ice, then topped with sparkling water and mint garnish.",
+        "price": 8.50,
+        "image": "Very-Berry-Hibiscus-Cooler.png"
+    },
+    {
+        "name": "Pistachio Cardamom Roll",
+        "description": "Cardamom and pistachio baked into a house-made brioche roll, topped with shaved pistachios.",
+        "price": 6.50,
+        "image": "Pistachio-Cardamom-Roll.jpg"
+    },
+    {
+        "name": "Truly Blue Tiramisu",
+        "description": "House-made tiramisu base with fresh espresso and blueberry syrup baked in, then topped with blueberry compote and an Oreo crust.",
+        "price": 12.99,
+        "image": "Truly-Blue-Tiramisu.png"
+    }
+]

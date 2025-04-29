@@ -2,12 +2,25 @@
 
 {% block title %}Home{% endblock %}
 
-{% block body_class %}home-page{% endblock %}
-
 {% block content %}
-    <div class="text-center">
-        <h1>Welcome to Bakes n' Shakes!</h1>
-        <p>Drinks and Pastries</p>
-        <a class="btn btn-primary" href="/menu">Browse Menu</a>
+<div class="text-center mb-5">
+    <h1 class="mb-4">Welcome to Bakes n' Shakes!</h1>
+    <p>Discover our cozy menu of drinks and pastries!</p>
+    <a class="btn btn-primary btn-lg mt-3" href="{{ url_for('main.menu') }}">Browse Menu</a>
+</div>
+
+{% if session.get('is_admin') %}
+<hr>
+<div class="row mt-5">
+    <div class="col-md-4">
+        <a href="{{ url_for('main.sales_report') }}" class="btn btn-outline-info w-100 py-3">Generate Sales Report</a>
     </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('main.modify_items') }}" class="btn btn-outline-warning w-100 py-3">Modify Sold Items</a>
+    </div>
+    <div class="col-md-4">
+        <a href="{{ url_for('main.promote_user') }}" class="btn btn-outline-success w-100 py-3">Promote User</a>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

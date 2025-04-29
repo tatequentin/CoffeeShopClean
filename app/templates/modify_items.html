@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Modify Items{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="mb-4 text-center">Modify Menu Items</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="item_index" class="form-label">Select Item to Edit</label>
+            <select class="form-select" name="item_index" required>
+                {% for item in menu %}
+                    <option value="{{ loop.index0 }}">{{ item.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="new_name" class="form-label">New Name</label>
+            <input type="text" class="form-control" name="new_name" required>
+        </div>
+        <button type="submit" class="btn btn-warning">Update Item</button>
+    </form>
+</div>
+{% endblock %}
