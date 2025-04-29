@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Order Confirmed{% endblock %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h1 class="mb-4">Thank you for your order!</h1>
+    <p class="lead">Your order has been placed successfully.</p>
+
+    <button id="modalButton" type="button" class="btn btn-primary d-none" data-bs-toggle="modal" data-bs-target="#receiptModal">
+      Open Modal
+    </button>
+
+    <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="receiptModalLabel">Order Completed</h5>
+          </div>
+          <div class="modal-body">
+            Would you like to print a receipt?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ url_for('main.index') }}'">Done</button>
+            <button type="button" class="btn btn-success" onclick="window.print()">Print Receipt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<script>
+window.onload = function() {
+    document.getElementById('modalButton').click();
+};
+</script>
+{% endblock %}
