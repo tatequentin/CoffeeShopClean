@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 import json
 import os
 import random
+from werkzeug.utils import secure_filename
 
 bp = Blueprint('main', __name__)
 DATA_DIR = os.path.join('app', 'data')
@@ -182,3 +183,18 @@ def add_item():
 
     return render_template('add_item.html')
 
+@bp.route('/delete-item/<int:item_index>', methods=['POST'])
+def delete_item(item_index):
+    if not session.get('is_admin'):
+        flash('Admin access required.')
+        return redirect(url_for('main.index'))
+
+    menu = load_menu()
+    if 0 <= item_index < len(menu):
+        deleted_item = menu.pop(item_index)
+        save_menu(menu)
+        flash(f"Removed item: {deleted_item['name']}")
+    else:
+        flash("Invalid item index.")
+    
+    return redirect(url_for('main.modify_items'))
