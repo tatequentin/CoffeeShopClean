@@ -59,8 +59,8 @@
     </div>
 
     {% if suggestions %}
-    <div class="text-center my-5">
-        <h2 class="h4 mb-4">You Might Also Like:</h2>
+    <div class="text-center mb-5 mt-5">
+        <h2 class="h4 mb-4">You might also like:</h2>
         <div class="row g-4 justify-content-center">
             {% for suggestion in suggestions %}
             <div class="col-md-4">
@@ -73,7 +73,7 @@
                             <p class="small text-muted">{{ suggestion.description }}</p>
                         </div>
                         <button class="btn btn-outline-info btn-sm me-2" onclick="toggleSuggestionDetails('{{ loop.index }}')">Details</button>
-                        <a href="{{ url_for('main.add_to_cart', item_id=suggestion.index) }}" class="btn btn-outline-success btn-sm">Add to Order</a>
+                        <a href="/add-to-cart/{{ suggestion.index }}" class="btn btn-outline-success btn-sm">Add to Order</a>
                     </div>
                 </div>
             </div>
@@ -86,7 +86,8 @@
 <script>
 function toggleSuggestionDetails(id) {
     const section = document.getElementById('suggestion-details-' + id);
-    section.style.display = (section.style.display === 'none') ? 'block' : 'none';
+    section.style.display = section.style.display === 'none' ? 'block' : 'none';
 }
 </script>
+
 {% endblock %}

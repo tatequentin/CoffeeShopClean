@@ -1,8 +1,8 @@
 [
     {
-        "name": "Honey Lavender Espresso",
+        "name": "Honey Rose Espresso",
         "description": "Doppio espresso, honey, lavender syrup.",
-        "price": 4.79,
+        "price": 5.79,
         "image": "Honey-Lavender-Espresso.png"
     },
     {
@@ -20,13 +20,13 @@
     {
         "name": "Very Berry Hibiscus Cooler",
         "description": "Blackberries, blueberries, mint, and agave muddled in a shaker tin, shaken and strained over ice, then topped with sparkling water and mint garnish.",
-        "price": 8.50,
+        "price": 8.5,
         "image": "Very-Berry-Hibiscus-Cooler.png"
     },
     {
         "name": "Pistachio Cardamom Roll",
         "description": "Cardamom and pistachio baked into a house-made brioche roll, topped with shaved pistachios.",
-        "price": 6.50,
+        "price": 6.5,
         "image": "Pistachio-Cardamom-Roll.jpg"
     },
     {

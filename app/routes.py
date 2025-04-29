@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 import json
 import os
+import random
 
 bp = Blueprint('main', __name__)
 DATA_DIR = os.path.join('app', 'data')
@@ -60,12 +61,19 @@ def modify_items():
     if not session.get('is_admin'):
         flash('Admin access required.')
         return redirect(url_for('main.index'))
+
     menu = load_menu()
+
     if request.method == 'POST':
-        menu[int(request.form['item_index'])]['name'] = request.form['new_name']
+        index = int(request.form['item_index'])
+        menu[index]['name'] = request.form['new_name']
+        menu[index]['description'] = request.form['new_description']
+        menu[index]['price'] = float(request.form['new_price'])
+
         save_menu(menu)
-        flash('Item updated!')
+        flash('Item updated successfully!')
         return redirect(url_for('main.modify_items'))
+
     return render_template('modify_items.html', menu=menu)
 
 @bp.route('/promote-user', methods=['GET', 'POST'])
@@ -108,10 +116,25 @@ def add_to_cart(item_id):
 @bp.route('/cart')
 def cart():
     cart_items = session.get('cart', [])
+
     subtotal = sum(item['price'] for item in cart_items)
-    tax = round(subtotal * 0.07, 2)
-    grand_total = round(subtotal + tax, 2)
-    return render_template('cart.html', cart_items=cart_items, subtotal=subtotal, tax=tax, grand_total=grand_total)
+    tax = subtotal * 0.07
+    grand_total = subtotal + tax
+
+    all_items = load_menu()
+    suggestions = []
+    if all_items:
+        sampled_items = random.sample(all_items, k=min(2, len(all_items)))
+        for item in sampled_items:
+            suggestions.append({
+                'index': all_items.index(item),
+                'name': item['name'],
+                'price': item['price'],
+                'description': item['description'],
+                'image': item['image']
+            })
+
+    return render_template('cart.html', cart_items=cart_items, subtotal=subtotal, tax=tax, grand_total=grand_total, suggestions=suggestions)
 
 @bp.route('/remove-from-cart/<int:item_index>')
 def remove_from_cart(item_index):
@@ -129,4 +152,33 @@ def confirm_order():
     session['cart'] = []
     return render_template('order_confirmed.html')
 
+@bp.route('/add-item', methods=['GET', 'POST'])
+def add_item():
+    if not session.get('is_admin'):
+        flash('Admin access required.')
+        return redirect(url_for('main.index'))
+
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+        price = float(request.form['price'])
+        image_file = request.files['image']
+
+        filename = secure_filename(image_file.filename)
+        image_path = os.path.join('app/static/img', filename)
+        image_file.save(image_path)
+
+        menu = load_menu()
+        menu.append({
+            'name': name,
+            'description': description,
+            'price': price,
+            'image': filename
+        })
+        save_menu(menu)
+
+        flash('Menu item added!')
+        return redirect(url_for('main.menu'))
+
+    return render_template('add_item.html')
 
