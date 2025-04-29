@@ -36,7 +36,6 @@
             {% if cart_items %}
             <div class="card shadow p-4">
                 <h4 class="mb-4">Summary</h4>
-
                 <ul class="list-group list-group-flush mb-4">
                     <li class="list-group-item d-flex justify-content-between">
                         <span>Subtotal:</span>
@@ -51,7 +50,6 @@
                         <strong>${{ '%.2f'|format(grand_total) }}</strong>
                     </li>
                 </ul>
-
                 <div class="d-grid">
                     <a href="{{ url_for('main.confirm_order') }}" class="btn btn-success btn-lg">Confirm Order</a>
                 </div>
@@ -59,5 +57,36 @@
             {% endif %}
         </div>
     </div>
+
+    {% if suggestions %}
+    <div class="text-center my-5">
+        <h2 class="h4 mb-4">You Might Also Like:</h2>
+        <div class="row g-4 justify-content-center">
+            {% for suggestion in suggestions %}
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <img src="{{ url_for('static', filename='img/' + suggestion.image) }}" class="card-img-top" alt="{{ suggestion.name }}" style="height: 180px; object-fit: cover;">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">{{ suggestion.name }}</h5>
+                        <p class="fw-bold">${{ '%.2f'|format(suggestion.price) }}</p>
+                        <div id="suggestion-details-{{ loop.index }}" style="display: none;">
+                            <p class="small text-muted">{{ suggestion.description }}</p>
+                        </div>
+                        <button class="btn btn-outline-info btn-sm me-2" onclick="toggleSuggestionDetails('{{ loop.index }}')">Details</button>
+                        <a href="{{ url_for('main.add_to_cart', item_id=suggestion.index) }}" class="btn btn-outline-success btn-sm">Add to Order</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 </div>
+
+<script>
+function toggleSuggestionDetails(id) {
+    const section = document.getElementById('suggestion-details-' + id);
+    section.style.display = (section.style.display === 'none') ? 'block' : 'none';
+}
+</script>
 {% endblock %}
